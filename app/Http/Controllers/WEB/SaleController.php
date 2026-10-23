@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\WEB;
 
 use App\Http\Controllers\Controller;
-use App\Models\Sale;
+use App\Models\Sales;
 use Illuminate\View\View;
 
 class SaleController extends Controller
@@ -21,11 +21,12 @@ class SaleController extends Controller
      */
     public function print(int $id): View
     {
-        $sale = Sale::with('details')->findOrFail($id);
-        $sale_data = $sale->toDetailArray();
+        $result = Sales::getSaleDetail($id);
 
-        return view('sales.print', [
-            'sale' => $sale_data,
-        ]);
+        if (! $result['body']['success']) {
+            abort($result['status']);
+        }
+
+        return view('sales.print', ['sale' => $result['body']['data']]);
     }
 }

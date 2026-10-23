@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\CacheController;
 use App\Http\Controllers\API\CacheLockController;
 use App\Http\Controllers\API\FailedJobController;
@@ -11,15 +11,6 @@ use App\Http\Controllers\API\PurchaseController;
 use App\Http\Controllers\API\SaleController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Menyediakan seluruh endpoint JSON / RESTful API untuk aplikasi.
-|
-*/
 
 // Authentication API
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');

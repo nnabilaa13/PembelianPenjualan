@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\API\AuthController as ApiAuthController;
+use App\Http\Controllers\API\Auth\AuthController as ApiAuthController;
 use App\Http\Controllers\WEB\AuthController;
 use App\Http\Controllers\WEB\DashboardController;
 use App\Http\Controllers\WEB\InventoryController;

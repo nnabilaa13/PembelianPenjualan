@@ -97,10 +97,12 @@ class UserController extends Controller
             foreach ($res['data'] as $row) {
                 $nestedData = $row;
                 $nestedData['action'] = '';
-                $nestedData['action'] .= '<div class="actions">';
-                $nestedData['action'] .= '<a href="#" class="btn btn-icon btn-warning" id="edit-data" data-id="'.$row['id'].'"><i class="fa fa-pencil"></i></a>';
-                $nestedData['action'] .= '&nbsp;';
-                $nestedData['action'] .= '<a href="#" class="btn btn-icon btn-danger" id="delete-data" data-id="'.$row['id'].'"><i class="fa fa-trash-o"></i></a>';
+                $nestedData['action'] .= '<div class="dropdown">';
+                $nestedData['action'] .= '    <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Aksi</button>';
+                $nestedData['action'] .= '    <div class="dropdown-menu dropdown-menu-animated">';
+                $nestedData['action'] .= '        <a href="javascript:void(0);" class="dropdown-item" id="edit-data" data-id="'.$row['id'].'">Edit</a>';
+                $nestedData['action'] .= '        <a href="javascript:void(0);" class="dropdown-item" id="delete-data" data-id="'.$row['id'].'">Delete</a>';
+                $nestedData['action'] .= '    </div>';
                 $nestedData['action'] .= '</div>';
 
                 $data[] = $nestedData;
@@ -109,8 +111,8 @@ class UserController extends Controller
 
         $json_data = [
             'draw' => intval($request->draw),
-            'recordsTotal' => intval($res['totalData']),
-            'recordsFiltered' => intval($res['totalFiltered']),
+            'recordsTotal' => intval($res['total_data']),
+            'recordsFiltered' => intval($res['total_filtered']),
             'data' => $data,
             'order' => $order,
         ];

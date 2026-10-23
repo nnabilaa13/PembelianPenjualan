@@ -3,87 +3,98 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Sale;
-use Illuminate\Http\JsonResponse;
+use App\Models\Sales;
 use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    /**
-     * Get sales datatables list.
-     */
-    public function data(Request $request): JsonResponse
+    public function get(Request $request, $id = null)
+    {
+        $params = $request->all();
+
+        if ($id != null) {
+            $result = Sales::getSaleDetail((int) $id);
+
+            return response()->json($result['body'], $result['status']);
+        } elseif (isset($params['all']) && $params['all']) {
+            $res = Sales::getAllResult($params, $request);
+        } else {
+            $res = Sales::getPaginatedResult($params, $request);
+        }
+
+        return $res;
+    }
+
+    public function post(Request $request)
+    {
+        $params = $request->all();
+
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Sales::storeSale($params, $session_user);
+
+        return response()->json($result['body'], $result['status']);
+    }
+
+    public function put(Request $request, $id)
+    {
+        $params = $request->all();
+
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Sales::updateSale((int) $id, $params, $session_user);
+
+        return response()->json($result['body'], $result['status']);
+    }
+
+    public function patch(Request $request, $id)
+    {
+        $params = $request->all();
+
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Sales::updateSale((int) $id, $params, $session_user);
+
+        return response()->json($result['body'], $result['status']);
+    }
+
+    public function delete(Request $request, $id)
     {
         $session_user = $request->session()->get('user');
-        $session_user_obj = is_array($session_user) ? (object) $session_user : $session_user;
-        $result = Sale::getDatatablesData($request->all(), $session_user_obj);
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Sales::deleteSale((int) $id, $session_user);
+
+        return response()->json($result['body'], $result['status']);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $params = $request->all();
+
+        return Sales::approveById($id, $params, $request);
+    }
+
+    public function data(Request $request)
+    {
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Sales::getDatatablesData($request->all(), $session_user);
 
         return response()->json($result);
     }
 
-    /**
-     * Alias for datatables request.
-     */
-    public function datatables(Request $request): JsonResponse
-    {
-        return $this->data($request);
-    }
-
-    /**
-     * Get single sale detail or datatables.
-     */
-    public function get(Request $request, ?int $id = null): JsonResponse
-    {
-        if ($id !== null) {
-            $result = Sale::getSaleDetail($id);
-
-            return response()->json($result['body'], $result['status']);
-        }
-
-        return $this->data($request);
-    }
-
-    /**
-     * Store new sale transaction.
-     */
-    public function post(Request $request): JsonResponse
+    public function datatables(Request $request)
     {
         $session_user = $request->session()->get('user');
-        $session_user_obj = is_array($session_user) ? (object) $session_user : $session_user;
-        $result = Sale::storeSale($request->all(), $session_user_obj);
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
 
-        return response()->json($result['body'], $result['status']);
-    }
+        $result = Sales::getDatatablesData($request->all(), $session_user);
 
-    /**
-     * Update sale transaction.
-     */
-    public function put(Request $request, int $id): JsonResponse
-    {
-        $session_user = $request->session()->get('user');
-        $session_user_obj = is_array($session_user) ? (object) $session_user : $session_user;
-        $result = Sale::updateSale($id, $request->all(), $session_user_obj);
-
-        return response()->json($result['body'], $result['status']);
-    }
-
-    /**
-     * Update sale transaction via PATCH.
-     */
-    public function patch(Request $request, int $id): JsonResponse
-    {
-        return $this->put($request, $id);
-    }
-
-    /**
-     * Delete sale transaction.
-     */
-    public function delete(Request $request, int $id): JsonResponse
-    {
-        $session_user = $request->session()->get('user');
-        $session_user_obj = is_array($session_user) ? (object) $session_user : $session_user;
-        $result = Sale::deleteSale($id, $session_user_obj);
-
-        return response()->json($result['body'], $result['status']);
+        return response()->json($result);
     }
 }

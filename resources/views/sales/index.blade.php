@@ -343,7 +343,7 @@ $(document).ready(function() {
         const qty = parseFloat($row.find('.item-qty').val()) || 0;
         const price = parseFloat($row.find('.item-price').val()) || 0;
         const subtotal = qty * price;
-        $row.find('.item-subtotal').val(formatRupiah(subtotal));
+        $row.find('.item-subtotal').val(formatCurrency(subtotal));
         calculateGrandTotal();
     }
 
@@ -354,7 +354,7 @@ $(document).ready(function() {
             const price = parseFloat($(this).find('.item-price').val()) || 0;
             grandTotal += (qty * price);
         });
-        $('#text-grand_total').text(formatRupiah(grandTotal));
+        $('#text-grand_total').text(formatCurrency(grandTotal));
     }
 
     $('#table-sale_body').on('input change', '.item-qty, .item-price', function() {

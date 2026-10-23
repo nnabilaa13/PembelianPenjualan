@@ -123,7 +123,7 @@
     <select name="name" id="select-user" class="form-select" required>
         <option value="" disabled selected>-- Pilih Pengguna --</option>
         
-        @foreach(($users ?? \App\Models\Users::all()) as $user_item)
+        @foreach(($users ?? []) as $user_item)
             <option value="{{ $user_item->name }}">
                 {{ $user_item->name }} &bull; [{{ $user_item->role }}]
             </option>
@@ -195,7 +195,7 @@
                             timer: 900,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = response.redirect || '{{ route("dashboard") }}';
+                            window.location.href = response.redirect || '/dashboard';
                         });
                     },
                     error: function(xhr) {

@@ -140,15 +140,15 @@
                 <div class="row g-3 mb-3 pb-3 border-bottom">
                     <div class="col-sm-4">
                         <span class="text-muted small d-block">Nomor Pembelian:</span>
-                        <strong class="fs-6 text-dark" id="detail-number">-</strong>
+                        <strong class="fs-6 text-dark" id="detail-purchase_number">-</strong>
                     </div>
                     <div class="col-sm-4">
                         <span class="text-muted small d-block">Tanggal:</span>
-                        <strong class="fs-6 text-dark" id="detail-date">-</strong>
+                        <strong class="fs-6 text-dark" id="detail-purchase_date">-</strong>
                     </div>
                     <div class="col-sm-4">
                         <span class="text-muted small d-block">Petugas Input:</span>
-                        <strong class="fs-6 text-dark" id="detail-creator">-</strong>
+                        <strong class="fs-6 text-dark" id="detail-purchase_creator">-</strong>
                     </div>
                 </div>
 
@@ -320,7 +320,7 @@ $(document).ready(function() {
         const qty = parseFloat($row.find('.item-qty').val()) || 0;
         const price = parseFloat($row.find('.item-price').val()) || 0;
         const subtotal = qty * price;
-        $row.find('.item-subtotal').val(formatRupiah(subtotal));
+        $row.find('.item-subtotal').val(formatCurrency(subtotal));
         calculateGrandTotal();
     }
 
@@ -331,7 +331,7 @@ $(document).ready(function() {
             const price = parseFloat($(this).find('.item-price').val()) || 0;
             grandTotal += (qty * price);
         });
-        $('#text-grand_total').text(formatRupiah(grandTotal));
+        $('#text-grand_total').text(formatCurrency(grandTotal));
     }
 
     $('#table-purchase_body').on('input change', '.item-qty, .item-price', function() {
@@ -509,9 +509,9 @@ $(document).ready(function() {
                 Swal.close();
                 if (response.success) {
                     const p = response.data;
-                    $('#detail-number').text(p.number);
-                    $('#detail-date').text(p.date);
-                    $('#detail-creator').text(p.creator_name);
+                    $('#detail-purchase_number').text(p.number);
+                    $('#detail-purchase_date').text(p.date);
+                    $('#detail-purchase_creator').text(p.creator_name);
                     $('#detail-grand_total').text(p.total_amount_formatted);
                     $('#btn-print_detail').attr('href', `{{ url('/purchases') }}/${p.id}/print`);
 

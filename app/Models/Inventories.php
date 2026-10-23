@@ -381,6 +381,7 @@ class Inventories extends Model
             }
 
             $action_html = '<div class="d-inline-flex gap-1">';
+            $action_html .= '<button type="button" class="btn btn-sm btn-outline-info btn-detail" data-id="'.$item_row->id.'" title="Detail"><i class="bi bi-eye"></i></button>';
             $action_html .= '<button type="button" class="btn btn-sm btn-outline-warning btn-edit" data-id="'.$item_row->id.'" title="Edit"><i class="bi bi-pencil"></i></button>';
             $action_html .= '<button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="'.$item_row->id.'" data-name="'.htmlspecialchars($item_row->name, ENT_QUOTES).'" title="Hapus"><i class="bi bi-trash"></i></button>';
             $action_html .= '</div>';

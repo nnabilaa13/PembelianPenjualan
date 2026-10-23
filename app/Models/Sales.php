@@ -433,83 +433,71 @@ class Sales extends Model
         }
 
         DB::beginTransaction();
-        try {
-            // Kembalikan stok lama sebelum pengecekan stok baru
-            $old_details = SalesDetails::where('sales_id', $sale->id)->get();
-            foreach ($old_details as $old_detail) {
-                Inventories::where('id', $old_detail->inventory_id)->increment('stock', (int) $old_detail->qty);
-            }
 
-            // Validasi ketersediaan stok baru setelah stok lama dikembalikan
-            foreach ($items_list as $item_check) {
-                $check_id = (int) ($item_check['inventory_id'] ?? 0);
-                $check_qty = (int) ($item_check['qty'] ?? 0);
-
-                $inventory_record = Inventories::where('id', $check_id)->first();
-                $available_stock = $inventory_record ? (int) $inventory_record->stock : 0;
-                $item_name = $inventory_record ? $inventory_record->name : 'Barang';
-
-                if (! $inventory_record || $check_qty > $available_stock) {
-                    DB::rollBack();
-
-                    return [
-                        'status' => 422,
-                        'body' => [
-                            'success' => false,
-                            'status' => 'error',
-                            'message' => "Stok untuk barang {$item_name} tidak mencukupi (Tersedia: {$available_stock}, Diminta: {$check_qty}).",
-                        ],
-                    ];
-                }
-            }
-
-            SalesDetails::where('sales_id', $sale->id)->delete();
-
-            $sale->update([
-                'number' => $sale_number,
-                'date' => $sale_date,
-            ]);
-
-            foreach ($items_list as $item_data) {
-                $inventory_id = (int) ($item_data['inventory_id'] ?? 0);
-                $qty = (int) ($item_data['qty'] ?? 0);
-                $price = (float) ($item_data['price'] ?? 0);
-
-                if ($inventory_id > 0 && $qty > 0) {
-                    SalesDetails::create([
-                        'sales_id' => $sale->id,
-                        'inventory_id' => $inventory_id,
-                        'qty' => $qty,
-                        'price' => $price,
-                    ]);
-
-                    Inventories::where('id', $inventory_id)->decrement('stock', $qty);
-                }
-            }
-
-            DB::commit();
-
-            return [
-                'status' => 200,
-                'body' => [
-                    'success' => true,
-                    'status' => 'success',
-                    'message' => 'Transaksi penjualan berhasil diperbarui dan stok telah disesuaikan.',
-                    'data' => $sale->fresh(),
-                ],
-            ];
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            return [
-                'status' => 500,
-                'body' => [
-                    'success' => false,
-                    'status' => 'error',
-                    'message' => 'Terjadi kesalahan saat memperbarui transaksi penjualan: '.$e->getMessage(),
-                ],
-            ];
+        // Kembalikan stok lama sebelum pengecekan stok baru
+        $old_details = SalesDetails::where('sales_id', $sale->id)->get();
+        foreach ($old_details as $old_detail) {
+            Inventories::where('id', $old_detail->inventory_id)->increment('stock', (int) $old_detail->qty);
         }
+
+        // Validasi ketersediaan stok baru setelah stok lama dikembalikan
+        foreach ($items_list as $item_check) {
+            $check_id = (int) ($item_check['inventory_id'] ?? 0);
+            $check_qty = (int) ($item_check['qty'] ?? 0);
+
+            $inventory_record = Inventories::where('id', $check_id)->first();
+            $available_stock = $inventory_record ? (int) $inventory_record->stock : 0;
+            $item_name = $inventory_record ? $inventory_record->name : 'Barang';
+
+            if (! $inventory_record || $check_qty > $available_stock) {
+                DB::rollBack();
+
+                return [
+                    'status' => 422,
+                    'body' => [
+                        'success' => false,
+                        'status' => 'error',
+                        'message' => "Stok untuk barang {$item_name} tidak mencukupi (Tersedia: {$available_stock}, Diminta: {$check_qty}).",
+                    ],
+                ];
+            }
+        }
+
+        SalesDetails::where('sales_id', $sale->id)->delete();
+
+        $sale->update([
+            'number' => $sale_number,
+            'date' => $sale_date,
+        ]);
+
+        foreach ($items_list as $item_data) {
+            $inventory_id = (int) ($item_data['inventory_id'] ?? 0);
+            $qty = (int) ($item_data['qty'] ?? 0);
+            $price = (float) ($item_data['price'] ?? 0);
+
+            if ($inventory_id > 0 && $qty > 0) {
+                SalesDetails::create([
+                    'sales_id' => $sale->id,
+                    'inventory_id' => $inventory_id,
+                    'qty' => $qty,
+                    'price' => $price,
+                ]);
+
+                Inventories::where('id', $inventory_id)->decrement('stock', $qty);
+            }
+        }
+
+        DB::commit();
+
+        return [
+            'status' => 200,
+            'body' => [
+                'success' => true,
+                'status' => 'success',
+                'message' => 'Transaksi penjualan berhasil diperbarui dan stok telah disesuaikan.',
+                'data' => $sale->fresh(),
+            ],
+        ];
     }
 
     public static function getDatatablesData(array $request_data, ?object $session_user): array

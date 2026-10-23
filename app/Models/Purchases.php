@@ -413,60 +413,48 @@ class Purchases extends Model
         }
 
         DB::beginTransaction();
-        try {
-            // Kembalikan stok lama sebelum dihapus
-            $old_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
-            foreach ($old_details as $old_detail) {
-                Inventories::where('id', $old_detail->inventory_id)->decrement('stock', (int) $old_detail->qty);
-            }
 
-            PurchaseDetails::where('purchase_id', $purchase->id)->delete();
-
-            $purchase->update([
-                'number' => $purchase_number,
-                'date' => $purchase_date,
-            ]);
-
-            foreach ($items_list as $item_data) {
-                $inventory_id = (int) ($item_data['inventory_id'] ?? 0);
-                $qty = (int) ($item_data['qty'] ?? 0);
-                $price = (float) ($item_data['price'] ?? 0);
-
-                if ($inventory_id > 0 && $qty > 0) {
-                    PurchaseDetails::create([
-                        'purchase_id' => $purchase->id,
-                        'inventory_id' => $inventory_id,
-                        'qty' => $qty,
-                        'price' => $price,
-                    ]);
-
-                    Inventories::where('id', $inventory_id)->increment('stock', $qty);
-                }
-            }
-
-            DB::commit();
-
-            return [
-                'status' => 200,
-                'body' => [
-                    'success' => true,
-                    'status' => 'success',
-                    'message' => 'Transaksi pembelian berhasil diperbarui dan stok telah disesuaikan.',
-                    'data' => $purchase->fresh(),
-                ],
-            ];
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            return [
-                'status' => 500,
-                'body' => [
-                    'success' => false,
-                    'status' => 'error',
-                    'message' => 'Terjadi kesalahan saat memperbarui transaksi pembelian: '.$e->getMessage(),
-                ],
-            ];
+        // Kembalikan stok lama sebelum dihapus
+        $old_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
+        foreach ($old_details as $old_detail) {
+            Inventories::where('id', $old_detail->inventory_id)->decrement('stock', (int) $old_detail->qty);
         }
+
+        PurchaseDetails::where('purchase_id', $purchase->id)->delete();
+
+        $purchase->update([
+            'number' => $purchase_number,
+            'date' => $purchase_date,
+        ]);
+
+        foreach ($items_list as $item_data) {
+            $inventory_id = (int) ($item_data['inventory_id'] ?? 0);
+            $qty = (int) ($item_data['qty'] ?? 0);
+            $price = (float) ($item_data['price'] ?? 0);
+
+            if ($inventory_id > 0 && $qty > 0) {
+                PurchaseDetails::create([
+                    'purchase_id' => $purchase->id,
+                    'inventory_id' => $inventory_id,
+                    'qty' => $qty,
+                    'price' => $price,
+                ]);
+
+                Inventories::where('id', $inventory_id)->increment('stock', $qty);
+            }
+        }
+
+        DB::commit();
+
+        return [
+            'status' => 200,
+            'body' => [
+                'success' => true,
+                'status' => 'success',
+                'message' => 'Transaksi pembelian berhasil diperbarui dan stok telah disesuaikan.',
+                'data' => $purchase->fresh(),
+            ],
+        ];
     }
 
     public static function getDatatablesData(array $request_data, ?object $session_user): array

@@ -3,92 +3,95 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory;
-use Illuminate\Http\JsonResponse;
+use App\Models\Inventories;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
-    /**
-     * Get inventory items list for API / tests.
-     */
-    public function data(): JsonResponse
+    public function get(Request $request, $id = null)
     {
-        $result = Inventory::getDataList();
+        $params = $request->all();
 
-        return response()->json($result);
-    }
+        if ($id != null) {
+            $result = Inventories::getItemDetail((int) $id);
 
-    /**
-     * Get select2 formatted options for dropdowns.
-     */
-    public function select2(Request $request): JsonResponse
-    {
-        $search_term = $request->query('q');
-        $result = Inventory::getSelect2Data($search_term);
-
-        return response()->json($result);
-    }
-
-    /**
-     * Get inventory items for jQuery DataTables.
-     */
-    public function datatables(Request $request): JsonResponse
-    {
-        $result = Inventory::getDatatablesData($request->all());
-
-        return response()->json($result);
-    }
-
-    /**
-     * Get single inventory item or list.
-     */
-    public function get(Request $request, ?int $id = null): JsonResponse
-    {
-        if ($id !== null) {
-            $result = Inventory::getItemDetail($id);
-
-            return response()->json($result, $result['success'] ? 200 : 404);
+            return response()->json($result);
+        } elseif (isset($params['all']) && $params['all']) {
+            $res = Inventories::getAllResult($params, $request);
+        } else {
+            $res = Inventories::getPaginatedResult($params, $request);
         }
 
-        return $this->data();
+        return $res;
     }
 
-    /**
-     * Store new inventory item.
-     */
-    public function post(Request $request): JsonResponse
+    public function post(Request $request)
     {
-        $result = Inventory::storeItem($request->all());
+        $params = $request->all();
+
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Inventories::storeItem($params);
 
         return response()->json($result['body'], $result['status']);
     }
 
-    /**
-     * Update existing inventory item.
-     */
-    public function put(Request $request, int $id): JsonResponse
+    public function put(Request $request, $id)
     {
-        $result = Inventory::updateItem($id, $request->all());
+        $params = $request->all();
+
+        $result = Inventories::updateItem((int) $id, $params);
 
         return response()->json($result['body'], $result['status']);
     }
 
-    /**
-     * Update existing inventory item via PATCH.
-     */
-    public function patch(Request $request, int $id): JsonResponse
+    public function patch(Request $request, $id)
     {
-        return $this->put($request, $id);
-    }
+        $params = $request->all();
 
-    /**
-     * Delete inventory item.
-     */
-    public function delete(Request $request, int $id): JsonResponse
-    {
-        $result = Inventory::deleteItem($id);
+        $result = Inventories::updateItem((int) $id, $params);
 
         return response()->json($result['body'], $result['status']);
+    }
+
+    public function delete(Request $request, $id)
+    {
+        $result = Inventories::deleteItem((int) $id);
+
+        return response()->json($result['body'], $result['status']);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $params = $request->all();
+
+        return Inventories::approveById($id, $params, $request);
+    }
+
+    public function data(Request $request)
+    {
+        $result = Inventories::getDataList();
+
+        return response()->json($result);
+    }
+
+    public function select2(Request $request)
+    {
+        $search_term = $request->get('q') ?? $request->get('search');
+
+        $result = Inventories::getSelect2Data($search_term);
+
+        return response()->json($result);
+    }
+
+    public function datatables(Request $request)
+    {
+        $session_user = $request->session()->get('user');
+        $session_user = is_array($session_user) ? (object) $session_user : $session_user;
+
+        $result = Inventories::getDatatablesData($request->all());
+
+        return response()->json($result);
     }
 }

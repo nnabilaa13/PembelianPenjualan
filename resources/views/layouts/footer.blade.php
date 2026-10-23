@@ -43,14 +43,15 @@
         timerProgressBar: true
     });
 
-    // Global Format Rupiah helper
-    function formatRupiah(number) {
+    // Global Format Currency helper (Standard English function name)
+    function formatCurrency(number) {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0
         }).format(number);
     }
+    const formatRupiah = formatCurrency;
 
     // Initialize Bootstrap tooltips
     function initTooltips(context) {

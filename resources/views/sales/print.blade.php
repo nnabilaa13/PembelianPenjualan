@@ -58,7 +58,7 @@
             </div>
             <div class="text-end">
                 <h5 class="fw-bold text-dark mb-1">{{ $sale_obj->number }}</h5>
-                <span class="text-muted">Tanggal: {{ is_string($sale_obj->date) ? $sale_obj->date : ($sale_obj->date ? $sale_obj->date->format('d/m/Y') : '-') }}</span>
+                <span class="text-muted">Tanggal: {{ $sale_obj->date ? \Illuminate\Support\Carbon::parse($sale_obj->date)->format('d/m/Y') : '-' }}</span>
             </div>
         </div>
 
@@ -85,27 +85,24 @@
                 </tr>
             </thead>
             <tbody>
-                @php $grand_total = 0; @endphp
                 @foreach($items_list as $index => $item)
                     @php
                         $item_obj = is_array($item) ? (object) $item : $item;
-                        $subtotal = $item_obj->subtotal ?? ($item_obj->qty * $item_obj->price);
-                        $grand_total += $subtotal;
                     @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td>{{ $item_obj->inventory_code ?? '-' }}</td>
                         <td>{{ $item_obj->inventory_name ?? 'Barang Dihapus' }}</td>
                         <td class="text-center">{{ $item_obj->qty }}</td>
-                        <td class="text-end">{{ $item_obj->price_formatted ?? ('Rp ' . number_format($item_obj->price, 0, ',', '.')) }}</td>
-                        <td class="text-end fw-semibold">{{ $item_obj->subtotal_formatted ?? ('Rp ' . number_format($subtotal, 0, ',', '.')) }}</td>
+                        <td class="text-end">{{ $item_obj->price_formatted }}</td>
+                        <td class="text-end fw-semibold">{{ $item_obj->subtotal_formatted }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr class="fw-bold table-light">
                     <td colspan="5" class="text-end">Total Pembayaran:</td>
-                    <td class="text-end text-success fs-6">Rp {{ number_format($grand_total, 0, ',', '.') }}</td>
+                    <td class="text-end text-success fs-6">{{ $sale_obj->grand_total_formatted }}</td>
                 </tr>
             </tfoot>
         </table>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\WEB;
 
 use App\Http\Controllers\Controller;
-use App\Models\Purchase;
+use App\Models\Purchases;
 use Illuminate\View\View;
 
 class PurchaseController extends Controller
@@ -21,11 +21,12 @@ class PurchaseController extends Controller
      */
     public function print(int $id): View
     {
-        $purchase = Purchase::with('details')->findOrFail($id);
-        $purchase_data = $purchase->toDetailArray();
+        $result = Purchases::getPurchaseDetail($id);
 
-        return view('purchase.print', [
-            'purchase' => $purchase_data,
-        ]);
+        if (! $result['body']['success']) {
+            abort($result['status']);
+        }
+
+        return view('purchase.print', ['purchase' => $result['body']['data']]);
     }
 }

@@ -82,6 +82,36 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal-inventory_detail" tabindex="-1" aria-labelledby="modal-inventory_detail_title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark fs-6" id="modal-inventory_detail_title">
+                    <i class="bi bi-eye text-info me-2"></i> Detail Barang
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">ID Barang</dt>
+                    <dd class="col-sm-8" id="detail-inventory_id">-</dd>
+                    <dt class="col-sm-4 text-muted">Kode Barang</dt>
+                    <dd class="col-sm-8" id="detail-inventory_code">-</dd>
+                    <dt class="col-sm-4 text-muted">Nama Barang</dt>
+                    <dd class="col-sm-8" id="detail-inventory_name">-</dd>
+                    <dt class="col-sm-4 text-muted">Harga Satuan</dt>
+                    <dd class="col-sm-8" id="detail-inventory_price">-</dd>
+                    <dt class="col-sm-4 text-muted">Jumlah Stok</dt>
+                    <dd class="col-sm-8" id="detail-inventory_stock">-</dd>
+                </dl>
+            </div>
+            <div class="modal-footer bg-white border-top py-2 px-4">
+                <button type="button" class="btn btn-sm btn-light border fw-semibold" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -128,6 +158,52 @@ $(document).ready(function() {
     });
 
     const modalInventory = new bootstrap.Modal(document.getElementById('modal-inventory'));
+    const modalInventoryDetail = new bootstrap.Modal(document.getElementById('modal-inventory_detail'));
+
+    $('#table-inventories').on('click', '.btn-detail', function() {
+        const id = $(this).data('id');
+
+        Swal.fire({
+            title: 'Memuat detail barang...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        $.ajax({
+            url: `{{ url('/api/inventories') }}/${id}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                Swal.close();
+
+                if (!response.success || !response.data) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message || 'Data barang tidak ditemukan.'
+                    });
+
+                    return;
+                }
+
+                const item = response.data;
+                $('#detail-inventory_id').text(item.id);
+                $('#detail-inventory_code').text(item.code || '-');
+                $('#detail-inventory_name').text(item.name || '-');
+                $('#detail-inventory_price').text(`Rp ${Number(item.price || 0).toLocaleString('id-ID')}`);
+                $('#detail-inventory_stock').text(`${item.stock ?? 0} unit`);
+
+                modalInventoryDetail.show();
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: xhr.responseJSON?.message || 'Gagal mengambil detail barang.'
+                });
+            }
+        });
+    });
 
     // Open Modal Tambah
     $('#btn-add_inventory').on('click', function() {
